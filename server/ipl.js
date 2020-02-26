@@ -8,11 +8,7 @@ const numberOfMatches = function(jsonObj) {
             emptyObj[arrVal.season] = 1; 
         }
     }, 0); 
-    const valArray = Object.values(emptyObj);
-    const sum = valArray.reduce((acc, curr) => {
-        return acc + curr;
-    });
-    return sum;
+    return emptyObj;
 };
 
 const matchesWonPerYear = function(jsonObj) {
@@ -34,10 +30,10 @@ const findMatchesWon = function(jsonObject, matchesWon) {
     });
     return matchesWon
 }
-const findAllId = function(jsonObject) {
+const findAllId = function(jsonObject, val) {
     const idArray = [];
     const res = jsonObject.reduce((acc, element) => {
-        if (element.season === '2016') {
+        if (element.season == val) {
             idArray.push(element.id);
         }
     }, 0);
@@ -62,11 +58,38 @@ const compute = function(emptyObj, deliveriesObj) {
     }
     return emptyObj;
 }
+const findBowlerObject = function(id, jsonObj) {
+    let emptyObj3 = {};
+    const a = id.reduce((acc, idObj) => {
+         const b = jsonObj.reduce((acc, deliveriesObj) => {
+            if(idObj === deliveriesObj.match_id) {
+                if (!emptyObj3[deliveriesObj.bowler]) {
+                    emptyObj3[deliveriesObj.bowler] = {};
+                }
+            }
+         }, 0);
+    }, 0);
+    return emptyObj3;
+};
+const findEcoBowler = function(ecoObject, jsonObj) {
+    const a = jsonObj.reduce((acc, currObj) => {
+        if(ecoObject[currObj.bowler][currObj.ball]) {
+            ecoObject[currObj.bowler][currObj.ball] += currObj.ball;
+            ecoObject[currObj.bowler][currObj.total_runs] += currObj.total_runs;
+        } else {
+            ecoObject[currObj.bowler][currObj.ball] = currObj.ball;
+            ecoObject[currObj.bowler][currObj.total_runs] += currObj.total_runs;   
+        }
+    }, 0);
+    return ecoObject;
+}
 
 module.exports = {
     numberOfMatches,
     matchesWonPerYear,
     findMatchesWon,
     findAllId,
-    findAllTeam
+    findAllTeam,
+    findEcoBowler,
+    findBowlerObject
 };
