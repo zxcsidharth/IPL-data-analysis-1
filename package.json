@@ -1,0 +1,15 @@
+{
+  "name": "src",
+  "version": "1.0.0",
+  "description": "ipl project",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "author": "sidharth",
+  "license": "ISC",
+  "dependencies": {
+    "convert-csv-to-json": "0.0.15",
+    "csvtojson": "^2.0.10"
+  }
+}
