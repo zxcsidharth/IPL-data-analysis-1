@@ -59,29 +59,56 @@ const compute = function(emptyObj, deliveriesObj) {
     return emptyObj;
 }
 const findBowlerObject = function(id, jsonObj) {
-    let emptyObj3 = {};
+    let emptyObjArr = [];
     const a = id.reduce((acc, idObj) => {
          const b = jsonObj.reduce((acc, deliveriesObj) => {
             if(idObj === deliveriesObj.match_id) {
-                if (!emptyObj3[deliveriesObj.bowler]) {
-                    emptyObj3[deliveriesObj.bowler] = {};
-                }
+                emptyObjArr.push(deliveriesObj);
             }
          }, 0);
     }, 0);
-    return emptyObj3;
+    return emptyObjArr;
 };
-const findEcoBowler = function(ecoObject, jsonObj) {
-    const a = jsonObj.reduce((acc, currObj) => {
-        if(ecoObject[currObj.bowler][currObj.ball]) {
-            ecoObject[currObj.bowler][currObj.ball] += currObj.ball;
-            ecoObject[currObj.bowler][currObj.total_runs] += currObj.total_runs;
-        } else {
-            ecoObject[currObj.bowler][currObj.ball] = currObj.ball;
-            ecoObject[currObj.bowler][currObj.total_runs] += currObj.total_runs;   
+const findEcoBowler = function(ecoObject) {
+    let emptyObject = {};
+    ecoObject.forEach((currObj) => {
+        if (!emptyObject[currObj.bowler]) {
+            emptyObject[currObj.bowler] = {};
         }
+    });
+    return emptyObject;
+}
+const findRunsAndBalls = function(bowlerObj, jsonObj) {
+    const res = jsonObj.reduce((acc, currObj) => {
+        let totalRun = (parseInt(currObj.batsman_runs) + parseInt(currObj.wide_runs) + parseInt(currObj.noball_runs) + parseInt(currObj.penalty_runs));
+        if(bowlerObj[currObj.bowler]['ball']) {
+            bowlerObj[currObj.bowler]['ball'] += 1 - (currObj.noball_runs || currObj.wide_runs);
+            bowlerObj[currObj.bowler]['total_runs'] += totalRun;
+        } else {
+            bowlerObj[currObj.bowler]['ball'] = 1;
+            bowlerObj[currObj.bowler]['total_runs'] = totalRun;   
+        }
+    });
+    let bowlerArr = Object.keys(bowlerObj);
+    return findEconomy(bowlerArr, bowlerObj);
+}
+function findEconomy(bowlerArr, bowlerObj) {
+    let economyBowlerArr = [];
+    const res = bowlerArr.reduce((acc, elementObj) => {
+        let economyBowlerObj = {};
+        let over = (bowlerObj[elementObj]['ball'])/6;
+        let ecoBowl = (bowlerObj[elementObj]['total_runs']) / over;
+        ecoBowl = Number.parseFloat(""+ecoBowl).toFixed(2);
+        economyBowlerObj[elementObj] = parseFloat(ecoBowl);
+        economyBowlerArr.push(economyBowlerObj);
     }, 0);
-    return ecoObject;
+    return economyBowlerArr;
+}
+
+function findEco(economyData) {
+    economyData.sort((a,b) => Object.values(a) - Object.values(b));
+    economyData.splice(10, (economyData.length - 10));
+    return economyData;
 }
 
 module.exports = {
@@ -91,5 +118,7 @@ module.exports = {
     findAllId,
     findAllTeam,
     findEcoBowler,
-    findBowlerObject
+    findBowlerObject,
+    findRunsAndBalls,
+    findEco
 };

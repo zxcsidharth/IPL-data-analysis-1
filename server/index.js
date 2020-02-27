@@ -4,7 +4,7 @@ const funcObj = require('./ipl.js');
 csv()
 .fromFile("/home/sidharth/WorkSpace/JavaScript/IPL_1_project/src/data/deliveries.csv")
 .then(function(jsonArrayObj){
-    console.log(jsonArrayObj);
+    //console.log(jsonArrayObj);
     csv()
     .fromFile("/home/sidharth/WorkSpace/JavaScript/IPL_1_project/src/data/matches.csv")
     .then(function(jsonArrayObj1){ 
@@ -18,9 +18,13 @@ csv()
         let totalteam = funcObj.findAllTeam(idArray, jsonArrayObj);
         //console.log(totalteam);
         let bowlerId = funcObj.findAllId(jsonArrayObj1, '2015');
-        let ecoBowler = funcObj.findBowlerObject(bowlerId, jsonArrayObj);
-        //let ecoscore = funcObj.findEcoBowler(ecoBowler, jsonArrayObj);
-        console.log(ecoBowler);
+        //console.log(bowlerId);
+        let ecoBowlerObjectArr = funcObj.findBowlerObject(bowlerId, jsonArrayObj);
+        let ecoscore = funcObj.findEcoBowler(ecoBowlerObjectArr);
+        let runsAndBalls = funcObj.findRunsAndBalls(ecoscore, ecoBowlerObjectArr);
+        //console.log(runsAndBalls);
+        let topTenBowler = funcObj.findEco(runsAndBalls);
+        console.log(topTenBowler);
     });
 });
 
