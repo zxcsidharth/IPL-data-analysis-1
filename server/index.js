@@ -10,21 +10,24 @@ csv()
     .then(function(jsonArrayObj1){ 
         //console.log(jsonArrayObj1);
         let matchesPlayed = funcObj.numberOfMatches(jsonArrayObj1);
+        // funcObj.writeToFile('matchesPlayedPeryear.json', matchesPlayed);
         //console.log(matchesPlayed);
         let matchesWon = funcObj.matchesWonPerYear(jsonArrayObj1);
         let perYearWin = funcObj.findMatchesWon(jsonArrayObj1, matchesWon);
         //console.log(perYearWin);
+        // funcObj.writeToFile('matchesPerYear.json', perYearWin);
         let idArray = funcObj.findAllId(jsonArrayObj1, '2016');
         let totalteam = funcObj.findAllTeam(idArray, jsonArrayObj);
         //console.log(totalteam);
+        // funcObj.writeToFile('extraRunsperTeam.json', totalteam);
         let bowlerId = funcObj.findAllId(jsonArrayObj1, '2015');
         //console.log(bowlerId);
         let ecoBowlerObjectArr = funcObj.findBowlerObject(bowlerId, jsonArrayObj);
         let ecoscore = funcObj.findEcoBowler(ecoBowlerObjectArr);
         let runsAndBalls = funcObj.findRunsAndBalls(ecoscore, ecoBowlerObjectArr);
-        //console.log(runsAndBalls);
+        console.log(runsAndBalls);
         let topTenBowler = funcObj.findEco(runsAndBalls);
-        console.log(topTenBowler);
+        //funcObj.writeToFile('economicBowler.json', topTenBowler);
     });
 });
 

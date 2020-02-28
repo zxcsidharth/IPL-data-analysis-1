@@ -1,4 +1,5 @@
 // all logics and function will reside here
+const fs = require('fs')
 const numberOfMatches = function(jsonObj) {
     let emptyObj = {};
     const result = jsonObj.reduce((accumulator, arrVal) => {
@@ -110,6 +111,17 @@ function findEco(economyData) {
     economyData.splice(10, (economyData.length - 10));
     return economyData;
 }
+const writeToFile = function(filePath, jsonObject) {
+    let data = JSON.stringify(jsonObject);
+    fs.writeFile("../output/" + filePath, data, 'utf-8', function(err){
+        if (err) {
+            console.log("error");
+        } else {
+            console.log("success");
+        }
+    
+    });
+}
 
 module.exports = {
     numberOfMatches,
@@ -120,5 +132,6 @@ module.exports = {
     findEcoBowler,
     findBowlerObject,
     findRunsAndBalls,
-    findEco
+    findEco,
+    writeToFile
 };
