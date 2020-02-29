@@ -1,32 +1,35 @@
 // All function call will be here
 const csv = require('csvtojson');
-const funcObj = require('./ipl.js');
+const IPLfunc = require('./ipl.js');
 csv()
-.fromFile("/home/sidharth/WorkSpace/JavaScript/IPL_1_project/src/data/deliveries.csv")
-.then(function(jsonArrayObj){
-    //console.log(jsonArrayObj);
+.fromFile("../data/deliveries.csv")
+.then(function(deliveriesJsonData){
+    //console.log(deliveries);
     csv()
-    .fromFile("/home/sidharth/WorkSpace/JavaScript/IPL_1_project/src/data/matches.csv")
-    .then(function(jsonArrayObj1){ 
-        //console.log(jsonArrayObj1);
-        let matchesPlayed = funcObj.numberOfMatches(jsonArrayObj1);
+    .fromFile("../data/matches.csv")
+    .then(function(matchesJsonData){ 
+        //console.log(matches);
+        let matchesPlayed = IPLfunc.numberOfMatchesPerYear(matchesJsonData);
         // funcObj.writeToFile('matchesPlayedPeryear.json', matchesPlayed);
-        //console.log(matchesPlayed);
-        let matchesWon = funcObj.matchesWonPerYear(jsonArrayObj1);
-        let perYearWin = funcObj.findMatchesWon(jsonArrayObj1, matchesWon);
+        // console.log(matchesPlayed);
+        let matchesWon = IPLfunc.matchesWonPerYear(matchesJsonData);
+        let perYearWin = IPLfunc.findMatchesWon(matchesJsonData, matchesWon);
         //console.log(perYearWin);
         // funcObj.writeToFile('matchesPerYear.json', perYearWin);
-        let idArray = funcObj.findAllId(jsonArrayObj1, '2016');
-        let totalteam = funcObj.findAllTeam(idArray, jsonArrayObj);
-        //console.log(totalteam);
-        // funcObj.writeToFile('extraRunsperTeam.json', totalteam);
-        let bowlerId = funcObj.findAllId(jsonArrayObj1, '2015');
-        //console.log(bowlerId);
-        let ecoBowlerObjectArr = funcObj.findBowlerObject(bowlerId, jsonArrayObj);
-        let ecoscore = funcObj.findEcoBowler(ecoBowlerObjectArr);
-        let runsAndBalls = funcObj.findRunsAndBalls(ecoscore, ecoBowlerObjectArr);
-        console.log(runsAndBalls);
-        let topTenBowler = funcObj.findEco(runsAndBalls);
+        let SelectedIdObject = IPLfunc.selectIdFromMatch(matchesJsonData, '2016');
+        // console.log(SelectedIdObject);
+        let extraRunsPerTeam = IPLfunc.findExtraRuns(SelectedIdObject, deliveriesJsonData);
+        // console.log(extraRunsPerTeam);
+        // funcObj.writeToFile('extraRunsperTeam.json', extraRunsPerTeam);
+        let bowlerIdObject = IPLfunc.selectIdFromMatch(matchesJsonData, '2015');
+        // console.log(bowlerIdObject);
+        let ecoBowlerObjectArr = IPLfunc.findBowlerObject(bowlerIdObject, deliveriesJsonData);
+        // console.log(ecoBowlerObjectArr);
+        let ecoBowlerscore = IPLfunc.findEcoBowler(ecoBowlerObjectArr);
+        let runsAndBalls = IPLfunc.findRunsAndBalls(ecoBowlerscore, ecoBowlerObjectArr);
+        // console.log(runsAndBalls);
+        let topTenBowler = IPLfunc.findEco(runsAndBalls);
+        console.log(topTenBowler);
         //funcObj.writeToFile('economicBowler.json', topTenBowler);
     });
 });

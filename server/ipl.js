@@ -1,57 +1,58 @@
 // all logics and function will reside here
 const fs = require('fs')
-const numberOfMatches = function(jsonObj) {
-    let emptyObj = {};
-    const result = jsonObj.reduce((accumulator, arrVal) => {
-        if (emptyObj[arrVal.season]) {
-            emptyObj[arrVal.season] = emptyObj[arrVal.season] + 1;
+const numberOfMatchesPerYear = function(matchesJson) {
+    const matchesPerYearObj = matchesJson.reduce((matchesPerYear, matchesCurrObject) => {
+        if (matchesPerYear[matchesCurrObject.season]) {
+            matchesPerYear[matchesCurrObject.season] = matchesPerYear[matchesCurrObject.season] + 1;
         } else {
-            emptyObj[arrVal.season] = 1; 
+            matchesPerYear[matchesCurrObject.season] = 1; 
         }
-    }, 0); 
-    return emptyObj;
+        return matchesPerYear
+    }, {}); 
+    return matchesPerYearObj;
 };
 
-const matchesWonPerYear = function(jsonObj) {
-    let emptyObj1 = {};
-    const result = jsonObj.reduce((accumulator, arrVal) => {
-        if (!emptyObj1[arrVal.season]) {
-            emptyObj1[arrVal.season] = {}; 
+const matchesWonPerYear = function(matchesJson) {
+    const matchesWon = matchesJson.reduce((emptyObj, matchesCurrObject) => {
+        if (!emptyObj[matchesCurrObject.season]) {
+            emptyObj[matchesCurrObject.season] = {}; 
         }
-    }, 0);
-    return emptyObj1;
+        return emptyObj;
+    }, {});
+    return matchesWon;
 }
-const findMatchesWon = function(jsonObject, matchesWon) {
-    jsonObject.forEach(element => {
-        if(matchesWon[element.season][element.winner]) {
-            matchesWon[element.season][element.winner] += 1;
+const findMatchesWon = function(matchesJson, matchesWonObj) {
+    matchesJson.forEach(selectedObj => {
+        if(matchesWonObj[selectedObj.season][selectedObj.winner]) {
+            matchesWonObj[selectedObj.season][selectedObj.winner] += 1;
         } else {
-            matchesWon[element.season][element.winner] = 1;
+            matchesWonObj[selectedObj.season][selectedObj.winner] = 1;
         }
     });
-    return matchesWon
+    return matchesWonObj
 }
-const findAllId = function(jsonObject, val) {
-    const idArray = [];
-    const res = jsonObject.reduce((acc, element) => {
-        if (element.season == val) {
-            idArray.push(element.id);
+const selectIdFromMatch = function(matchJson, year) {
+    const matchIdArray = matchJson.filter((currentMatchObj) => {
+        return currentMatchObj.season == year;
+    });
+    const matchIdObject = matchIdArray.reduce((emptyObj, selectedMatchObj) => {
+        if(!emptyObj[selectedMatchObj.id]){
+            emptyObj[selectedMatchObj.id] = selectedMatchObj.id;
         }
-    }, 0);
-    return idArray;
+        return emptyObj;
+    }, {});
+    return matchIdObject;
 }
-const findAllTeam = function(idArray, jsonObject) {
-    let emptyObj2 = {};
-    const a = idArray.reduce((acc, idObj) => {
-        const b = jsonObject.reduce((acc, deliveriesObj) => {
-            if(idObj === deliveriesObj.match_id) {
-                emptyObj2 = compute(emptyObj2, deliveriesObj);
-            }
-        }, 0);
-    }, 0);
-    return emptyObj2;
+const findExtraRuns = function(selectedIdObject, deleveriesJson) {
+    const totalExtraRuns = deleveriesJson.reduce((emptyObj, currentDeliveryObj) => {
+        if(selectedIdObject[currentDeliveryObj.match_id]) {
+            return computeExtraRunPerTeam(emptyObj, currentDeliveryObj);
+        }
+        return emptyObj;
+    }, {});
+    return totalExtraRuns;
 }
-const compute = function(emptyObj, deliveriesObj) {
+const computeExtraRunPerTeam = function(emptyObj, deliveriesObj) {
     if(emptyObj[deliveriesObj.bowling_team]) {
         emptyObj[deliveriesObj.bowling_team] += parseInt(deliveriesObj.extra_runs);
     } else {
@@ -59,50 +60,49 @@ const compute = function(emptyObj, deliveriesObj) {
     }
     return emptyObj;
 }
-const findBowlerObject = function(id, jsonObj) {
-    let emptyObjArr = [];
-    const a = id.reduce((acc, idObj) => {
-         const b = jsonObj.reduce((acc, deliveriesObj) => {
-            if(idObj === deliveriesObj.match_id) {
-                emptyObjArr.push(deliveriesObj);
-            }
-         }, 0);
-    }, 0);
-    return emptyObjArr;
+const findBowlerObject = function(selectedBowlerId, deleiveryJsonData) {
+    const ecoBowlerArray = deleiveryJsonData.reduce((emptyArray, deliveriesObj) => {
+        if(selectedBowlerId[deliveriesObj.match_id]) {
+            emptyArray.push(deliveriesObj);
+        }
+        return emptyArray;
+     }, []);
+    return ecoBowlerArray;
 };
-const findEcoBowler = function(ecoObject) {
-    let emptyObject = {};
-    ecoObject.forEach((currObj) => {
-        if (!emptyObject[currObj.bowler]) {
-            emptyObject[currObj.bowler] = {};
+const findEcoBowler = function(ecoBowlerObjArray) {
+    const ecoBowler = ecoBowlerObjArray.reduce((emptyBowlerObject, currentObj) => {
+        if (!emptyBowlerObject[currentObj.bowler]) {
+            emptyBowlerObject[currentObj.bowler] = {};
         }
-    });
-    return emptyObject;
+        return emptyBowlerObject;
+    }, {});
+    return ecoBowler;
 }
-const findRunsAndBalls = function(bowlerObj, jsonObj) {
-    const res = jsonObj.reduce((acc, currObj) => {
+const findRunsAndBalls = function(bowlerScoreObj, ecoBowlerObject) {
+    const result = ecoBowlerObject.reduce((unUsedValue, currObj) => {
         let totalRun = (parseInt(currObj.batsman_runs) + parseInt(currObj.wide_runs) + parseInt(currObj.noball_runs) + parseInt(currObj.penalty_runs));
-        if(bowlerObj[currObj.bowler]['ball']) {
-            bowlerObj[currObj.bowler]['ball'] += 1 - (currObj.noball_runs || currObj.wide_runs);
-            bowlerObj[currObj.bowler]['total_runs'] += totalRun;
+        if(bowlerScoreObj[currObj.bowler]['ball']) {
+            bowlerScoreObj[currObj.bowler]['ball'] += 1 - (currObj.noball_runs || currObj.wide_runs);
+            bowlerScoreObj[currObj.bowler]['total_runs'] += totalRun;
         } else {
-            bowlerObj[currObj.bowler]['ball'] = 1;
-            bowlerObj[currObj.bowler]['total_runs'] = totalRun;   
+            bowlerScoreObj[currObj.bowler]['ball'] = 1;
+            bowlerScoreObj[currObj.bowler]['total_runs'] = totalRun;   
         }
     });
-    let bowlerArr = Object.keys(bowlerObj);
-    return findEconomy(bowlerArr, bowlerObj);
+    let bowlerArr = Object.keys(bowlerScoreObj);
+    return findEconomy(bowlerArr, bowlerScoreObj);
 }
-function findEconomy(bowlerArr, bowlerObj) {
-    let economyBowlerArr = [];
-    const res = bowlerArr.reduce((acc, elementObj) => {
+function findEconomy(bowlerArr, bowlerScoreObj) {
+    // let economyBowlerArr = [];
+    const economyBowlerArr = bowlerArr.reduce((economyBowler, elementObj) => {
         let economyBowlerObj = {};
-        let over = (bowlerObj[elementObj]['ball'])/6;
-        let ecoBowl = (bowlerObj[elementObj]['total_runs']) / over;
+        let over = (bowlerScoreObj[elementObj]['ball'])/6;
+        let ecoBowl = (bowlerScoreObj[elementObj]['total_runs']) / over;
         ecoBowl = Number.parseFloat(""+ecoBowl).toFixed(2);
         economyBowlerObj[elementObj] = parseFloat(ecoBowl);
-        economyBowlerArr.push(economyBowlerObj);
-    }, 0);
+        economyBowler.push(economyBowlerObj);
+        return economyBowler;
+    }, []);
     return economyBowlerArr;
 }
 
@@ -124,11 +124,11 @@ const writeToFile = function(filePath, jsonObject) {
 }
 
 module.exports = {
-    numberOfMatches,
+    numberOfMatchesPerYear,
     matchesWonPerYear,
     findMatchesWon,
-    findAllId,
-    findAllTeam,
+    selectIdFromMatch,
+    findExtraRuns,
     findEcoBowler,
     findBowlerObject,
     findRunsAndBalls,
