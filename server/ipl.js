@@ -1,5 +1,7 @@
 // all logics and function will reside here
 const fs = require('fs')
+
+//number of matches played per year by all team
 const numberOfMatchesPerYear = function(matchesJson) {
     const matchesPerYearObj = matchesJson.reduce((matchesPerYear, matchesCurrObject) => {
         if (matchesPerYear[matchesCurrObject.season]) {
@@ -12,6 +14,7 @@ const numberOfMatchesPerYear = function(matchesJson) {
     return matchesPerYearObj;
 };
 
+// this function will create an object with key as year and value as and empty object 
 const matchesWonPerYear = function(matchesJson) {
     const matchesWon = matchesJson.reduce((emptyObj, matchesCurrObject) => {
         if (!emptyObj[matchesCurrObject.season]) {
@@ -21,6 +24,8 @@ const matchesWonPerYear = function(matchesJson) {
     }, {});
     return matchesWon;
 }
+
+//  this function will return an object with total matches won by per team per year  
 const findMatchesWon = function(matchesJson, matchesWonObj) {
     matchesJson.forEach(selectedObj => {
         if(matchesWonObj[selectedObj.season][selectedObj.winner]) {
@@ -31,6 +36,8 @@ const findMatchesWon = function(matchesJson, matchesWonObj) {
     });
     return matchesWonObj
 }
+
+//it will create an object of all those whose id matches with a given year
 const selectIdFromMatch = function(matchJson, year) {
     const matchIdArray = matchJson.filter((currentMatchObj) => {
         return currentMatchObj.season == year;
@@ -43,6 +50,8 @@ const selectIdFromMatch = function(matchJson, year) {
     }, {});
     return matchIdObject;
 }
+
+// return extra runs given by every bowler in that team
 const findExtraRuns = function(selectedIdObject, deleveriesJson) {
     const totalExtraRuns = deleveriesJson.reduce((emptyObj, currentDeliveryObj) => {
         if(selectedIdObject[currentDeliveryObj.match_id]) {
@@ -60,6 +69,8 @@ const computeExtraRunPerTeam = function(emptyObj, deliveriesObj) {
     }
     return emptyObj;
 }
+
+// return an array of all those bowler in that given year
 const findBowlerObject = function(selectedBowlerId, deleiveryJsonData) {
     const ecoBowlerArray = deleiveryJsonData.reduce((emptyArray, deliveriesObj) => {
         if(selectedBowlerId[deliveriesObj.match_id]) {
@@ -69,6 +80,8 @@ const findBowlerObject = function(selectedBowlerId, deleiveryJsonData) {
      }, []);
     return ecoBowlerArray;
 };
+
+// return an nested object of bowler's name with object as value
 const findEcoBowler = function(ecoBowlerObjArray) {
     const ecoBowler = ecoBowlerObjArray.reduce((emptyBowlerObject, currentObj) => {
         if (!emptyBowlerObject[currentObj.bowler]) {
@@ -78,11 +91,14 @@ const findEcoBowler = function(ecoBowlerObjArray) {
     }, {});
     return ecoBowler;
 }
+
+// returns an object mapped with bowler name and value as total runs and balls
 const findRunsAndBalls = function(bowlerScoreObj, ecoBowlerObject) {
     const result = ecoBowlerObject.reduce((unUsedValue, currObj) => {
         let totalRun = (parseInt(currObj.batsman_runs) + parseInt(currObj.wide_runs) + parseInt(currObj.noball_runs) + parseInt(currObj.penalty_runs));
         if(bowlerScoreObj[currObj.bowler]['ball']) {
-            bowlerScoreObj[currObj.bowler]['ball'] += 1 - (currObj.noball_runs || currObj.wide_runs);
+            if(!(currObj.noball_runs > 1 || currObj.wide_runs > 1))
+                bowlerScoreObj[currObj.bowler]['ball'] += 1;
             bowlerScoreObj[currObj.bowler]['total_runs'] += totalRun;
         } else {
             bowlerScoreObj[currObj.bowler]['ball'] = 1;
@@ -92,8 +108,9 @@ const findRunsAndBalls = function(bowlerScoreObj, ecoBowlerObject) {
     let bowlerArr = Object.keys(bowlerScoreObj);
     return findEconomy(bowlerArr, bowlerScoreObj);
 }
+
+// calculate all the economy bowlers list according to data extarxted from above
 function findEconomy(bowlerArr, bowlerScoreObj) {
-    // let economyBowlerArr = [];
     const economyBowlerArr = bowlerArr.reduce((economyBowler, elementObj) => {
         let economyBowlerObj = {};
         let over = (bowlerScoreObj[elementObj]['ball'])/6;
@@ -106,11 +123,15 @@ function findEconomy(bowlerArr, bowlerScoreObj) {
     return economyBowlerArr;
 }
 
+// sort the economic bowler Object in order to get top ten economic bowler's
 function findEco(economyData) {
     economyData.sort((a,b) => Object.values(a) - Object.values(b));
     economyData.splice(10, (economyData.length - 10));
     return economyData;
 }
+
+// write the given json data format to the respective json file, this same function will be 
+// called for writing data all the four files
 const writeToFile = function(filePath, jsonObject) {
     let data = JSON.stringify(jsonObject);
     fs.writeFile("../output/" + filePath, data, 'utf-8', function(err){
