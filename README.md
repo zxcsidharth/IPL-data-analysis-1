@@ -9,4 +9,4 @@ question. The question are given below
 4. Top 10 economical bowlers in 2015
 
 so i am using javaScript for doing the analysis and the results are stored inside four file of JSON type which are residing inside 
-the data directory of the project
+the output directory of the project
